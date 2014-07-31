@@ -18,36 +18,74 @@ depth=11*inch;
 //height=1.5*inch;
 //depth=5.5*inch;
 
-shelf_perimeter_thickness = eighth_inch;
-shelf_center_thickness = sixteenth_inch;
+perimeter_thickness = eighth_inch;
+center_thickness = sixteenth_inch;
 
 leg_thickness = sixteenth_inch;
-leg_width_depth = half_inch;
+leg_wd = half_inch;
 
-corner_slop=0.15 * units_per_inch;
-corner_notch_wd=(2*leg_width_depth) + corner_slop;
-corner_notch_h=shelf_perimeter_thickness-sixteenth_inch; // center=true below makes this half-height
+corner_slop = sixteenth_inch/4;
+corner_notch_wd = leg_wd;
+corner_notch_h = (perimeter_thickness-sixteenth_inch);
+
+corner_post_wd = leg_wd-(leg_thickness*2)-corner_slop;
 
 perimeter_width=quarter_inch;
 
-rotate([0,180,0])
+module leg_punch(offset_w,offset_d) {
+	punch_wd = leg_wd-(2*leg_thickness);
+	translate([leg_thickness + offset_w, leg_thickness + offset_d, 0])
+		cube([punch_wd,punch_wd,height-perimeter_thickness]);
+}
+
+module corner_notch(offset_w,offset_d) {
+	epsilon = .01; // slop to prevent simple: no
+	offset_h = height-corner_notch_h + epsilon;
+	subtract_h = corner_notch_h+epsilon;
+	subtract_long = corner_notch_wd;
+	subtract_short = corner_notch_wd-corner_post_wd;
+
+	translate([offset_w,offset_d,offset_h])
+		cube([subtract_short,subtract_long,subtract_h]);
+
+	translate([offset_w+corner_post_wd,offset_d,offset_h])
+		cube([subtract_short,subtract_long,subtract_h]);
+
+	translate([offset_w,offset_d,offset_h])
+		cube([subtract_long,subtract_short,subtract_h]);
+
+	translate([offset_w,offset_d+corner_post_wd,offset_h])
+		cube([subtract_long,subtract_short,subtract_h]);
+
+}
+
+rotate([0,180,0]) // for plating
 difference() { 
 // main solid
 cube([width,depth,height]);
 
 // carve around legs
-translate([leg_width_depth,0,0]) cube([width-(2*leg_width_depth),depth,height-shelf_perimeter_thickness]);
-translate([0,leg_width_depth,0]) cube([width,depth-(2*leg_width_depth),height-shelf_perimeter_thickness]);
+translate([leg_wd,-inch,0]) cube([width-(2*leg_wd),depth+(2*inch),height-perimeter_thickness]);
+translate([-inch,leg_wd,0]) cube([width+(2*inch),depth-(2*leg_wd),height-perimeter_thickness]);
 
-// notch inside of legs
-translate([leg_thickness,leg_thickness,0]) cube([width-(2*leg_thickness),depth-(2*leg_thickness),height-shelf_perimeter_thickness]);
+// L-shaped legs
+//translate([leg_thickness,leg_thickness,0]) cube([width-(2*leg_thickness),depth-(2*leg_thickness),height-perimeter_thickness]);
+
+// square legs (hollow)
+leg_punch(0,0);
+leg_punch(width-leg_wd,0);
+leg_punch(0,depth-leg_wd);
+leg_punch(width-leg_wd,depth-leg_wd);
 
 // corners for stacking
-translate([0,0,height]) cube(size=[corner_notch_wd,corner_notch_wd,corner_notch_h],center=true);
-translate([width,0,height]) cube(size=[corner_notch_wd,corner_notch_wd,corner_notch_h],center=true);
-translate([0,depth,height]) cube(size=[corner_notch_wd,corner_notch_wd,corner_notch_h],center=true);
-translate([width,depth,height]) cube(size=[corner_notch_wd,corner_notch_wd,corner_notch_h],center=true);
+corner_notch(0,0);
+corner_notch(width-leg_wd,0);
+corner_notch(0,depth-leg_wd);
+corner_notch(width-leg_wd,depth-leg_wd);
 
-translate([perimeter_width,perimeter_width,0]) cube([width-(2*perimeter_width),depth-(2*perimeter_width),height-shelf_center_thickness]);
+// thin out center of shelf
+translate([leg_wd,perimeter_width,0]) cube([width-(2*leg_wd),depth-(2*perimeter_width),height-center_thickness]);
+translate([perimeter_width,leg_wd,0]) cube([width-(2*perimeter_width),depth-(2*leg_wd),height-center_thickness]);
+
 // vents?
 }
