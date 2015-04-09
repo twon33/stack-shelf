@@ -51,8 +51,11 @@ difference() {
     cylinder(h=leg_hole_wd, r=leg_cylinder_support_radius, center=true);
 
   // tab band
-  translate([0,0,table_height]) cube([tab_band_w,leg_wd,tab_band_h]);
-  translate([leg_wd-tab_band_w-render_slop,0,table_height]) cube([tab_band_w+render_slop,leg_wd,tab_band_h]);
+  translate([0,0,table_height])
+    cube([tab_band_w,leg_wd,tab_band_h]);
+  
+  translate([leg_wd-tab_band_w-render_slop,0,table_height])
+    cube([tab_band_w+render_slop,leg_wd,tab_band_h]);
 
   translate([0,0,table_height]) 
     cube([leg_wd,tab_band_d,tab_band_h]);
@@ -68,28 +71,27 @@ difference() {
 
   // tab squeeze cutout
   translate([0,(leg_wd/2.0)-(tab_squeeze_cutout_w/2.0),table_height + tab_squeeze_cylinder_support_radius + render_slop]) 
-      cube([leg_wd,tab_squeeze_cutout_w,tab_squeeze_inner_h]);
+    cube([leg_wd,tab_squeeze_cutout_w,tab_squeeze_inner_h]);
   
   translate([leg_wd/2,leg_wd/2,table_height + tab_squeeze_cylinder_support_radius + sixteenth_inch/4]) 
-      rotate(a=[0,90,0])
-      cylinder(h=leg_wd, r=tab_squeeze_cylinder_support_radius, center=true, $fn=16);
+    rotate(a=[0,90,0])
+    cylinder(h=leg_wd, r=tab_squeeze_cylinder_support_radius, center=true, $fn=16);
       
   // ensure tabs nest with hole in stacking leg
   translate([0,0,table_height]) 
-      cube([leg_thickness+print_slop,leg_wd,tab_squeeze_total_h]);
+    cube([leg_thickness+print_slop,leg_wd,tab_squeeze_total_h]);
 
   translate([leg_wd-leg_thickness-render_slop,0,table_height])
-      cube([leg_thickness+render_slop+print_slop,leg_wd,tab_squeeze_total_h]);
+    cube([leg_thickness+render_slop+print_slop,leg_wd,tab_squeeze_total_h]);
 
   // angle cutouts for squeeze
   translate([0,leg_thickness,tab_squeeze_angle_start_h]) 
-      rotate([tab_squeeze_angle,0,0])
-          cube([leg_wd,leg_wd,tab_squeeze_total_h]);
+    rotate([tab_squeeze_angle,0,0])
+    cube([leg_wd,leg_wd,tab_squeeze_total_h]);
 
   translate([0,leg_wd-leg_thickness,tab_squeeze_angle_start_h])
-      rotate([90-tab_squeeze_angle,0,0])
-          cube([leg_wd,leg_wd,tab_squeeze_total_h]);
-
+    rotate([90-tab_squeeze_angle,0,0])
+    cube([leg_wd,leg_wd,tab_squeeze_total_h]);
 }
 
 translate([1*inch, 0, 0 * table_height]) difference() {
