@@ -7,7 +7,7 @@ half_inch = units_per_inch / 2.0;
 inch = units_per_inch / 1.0;
 
 render_slop = .1; // Slop to make up for lack of precision in the renderer (unitless)
-print_slop = 0.01*inch; // Slop to make up for oddities/meltiness during printing
+print_slop = 0.02*inch; // Slop to make up for oddities/meltiness during printing
 
 leg_wd = half_inch;
 leg_thickness = sixteenth_inch;
@@ -38,6 +38,49 @@ tab_squeeze_foot_h = 3*sixteenth_inch;
 tab_squeeze_angle_start_h = table_height+tab_band_h+tab_squeeze_foot_h;
 tab_squeeze_angle = 75.0; // degrees
 
+module tab_band() {
+  translate([-render_slop/2,-render_slop/2,table_height])
+    cube([tab_band_w+render_slop,leg_wd+render_slop,tab_band_h+print_slop]);
+    
+  translate([leg_wd-tab_band_w-render_slop/2,-render_slop/2,table_height])
+    cube([tab_band_w+render_slop,leg_wd+render_slop,tab_band_h+print_slop]);
+
+  translate([-render_slop/2,-render_slop/2,table_height]) 
+    cube([leg_wd+render_slop,tab_band_d+render_slop,tab_band_h+print_slop]);
+
+  translate([-render_slop/2,leg_wd-tab_band_d-render_slop/2,table_height])
+    cube([leg_wd+render_slop,tab_band_d+render_slop,tab_band_h+print_slop]);
+}
+
+module tab_squeeze_cutout() {
+  translate([0,(leg_wd/2.0)-(tab_squeeze_cutout_w/2.0),table_height + tab_squeeze_cylinder_support_radius + render_slop]) 
+    cube([leg_wd,tab_squeeze_cutout_w,tab_squeeze_inner_h]);
+  
+  translate([leg_wd/2,leg_wd/2,table_height + tab_squeeze_cylinder_support_radius + sixteenth_inch/4]) 
+    rotate(a=[0,90,0])
+    cylinder(h=leg_wd, r=tab_squeeze_cylinder_support_radius, center=true, $fn=16);
+}
+
+module tab_angle_cutouts() {
+  translate([0,leg_thickness,tab_squeeze_angle_start_h]) 
+    rotate([tab_squeeze_angle,0,0])
+    cube([leg_wd,leg_wd,tab_squeeze_total_h]);
+
+  translate([0,leg_wd-leg_thickness,tab_squeeze_angle_start_h])
+    rotate([90-tab_squeeze_angle,0,0])
+    cube([leg_wd,leg_wd,tab_squeeze_total_h]);
+}
+
+module leg_difference_tube_with_height(h) {
+  translate([-render_slop/2, -render_slop/2, 0])
+    difference() {
+      cube([leg_wd+render_slop,leg_wd+render_slop,h]);
+      
+      translate([leg_thickness+print_slop/2,leg_thickness+print_slop/2,-render_slop/2])
+        cube([leg_hole_wd-print_slop,leg_hole_wd-print_slop,h+render_slop]);
+    }
+}
+
 difference() { 
   cube([leg_wd,leg_wd,total_height]);
 
@@ -50,48 +93,10 @@ difference() {
     rotate(a=[90,11.25,0]) // 11.25 sets a vertex at the top rather than a side
     cylinder(h=leg_hole_wd, r=leg_cylinder_support_radius, center=true);
 
-  // tab band
-  translate([0,0,table_height])
-    cube([tab_band_w,leg_wd,tab_band_h]);
-  
-  translate([leg_wd-tab_band_w-render_slop,0,table_height])
-    cube([tab_band_w+render_slop,leg_wd,tab_band_h]);
-
-  translate([0,0,table_height]) 
-    cube([leg_wd,tab_band_d,tab_band_h]);
-
-  translate([0,leg_wd-tab_band_d,table_height])
-    cube([leg_wd,tab_band_d,tab_band_h]);
-
-  translate([0,0,table_height])
-    cube([leg_wd,leg_thickness,tab_squeeze_total_h]);
-
-  translate([0,leg_wd-leg_thickness-render_slop,table_height])
-    cube([leg_wd,leg_thickness+render_slop,tab_squeeze_total_h]);
-
-  // tab squeeze cutout
-  translate([0,(leg_wd/2.0)-(tab_squeeze_cutout_w/2.0),table_height + tab_squeeze_cylinder_support_radius + render_slop]) 
-    cube([leg_wd,tab_squeeze_cutout_w,tab_squeeze_inner_h]);
-  
-  translate([leg_wd/2,leg_wd/2,table_height + tab_squeeze_cylinder_support_radius + sixteenth_inch/4]) 
-    rotate(a=[0,90,0])
-    cylinder(h=leg_wd, r=tab_squeeze_cylinder_support_radius, center=true, $fn=16);
-      
-  // ensure tabs nest with hole in stacking leg
-  translate([0,0,table_height]) 
-    cube([leg_thickness+print_slop,leg_wd,tab_squeeze_total_h]);
-
-  translate([leg_wd-leg_thickness-render_slop,0,table_height])
-    cube([leg_thickness+render_slop+print_slop,leg_wd,tab_squeeze_total_h]);
-
-  // angle cutouts for squeeze
-  translate([0,leg_thickness,tab_squeeze_angle_start_h]) 
-    rotate([tab_squeeze_angle,0,0])
-    cube([leg_wd,leg_wd,tab_squeeze_total_h]);
-
-  translate([0,leg_wd-leg_thickness,tab_squeeze_angle_start_h])
-    rotate([90-tab_squeeze_angle,0,0])
-    cube([leg_wd,leg_wd,tab_squeeze_total_h]);
+  tab_band();
+  tab_squeeze_cutout();  
+  translate([0,0,table_height]) leg_difference_tube_with_height(tab_squeeze_total_h+render_slop);
+  tab_angle_cutouts();
 }
 
 translate([1*inch, 0, 0 * table_height]) difference() {
