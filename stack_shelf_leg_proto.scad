@@ -81,27 +81,34 @@ module leg_difference_tube_with_height(h) {
     }
 }
 
-difference() { 
-  cube([leg_wd,leg_wd,total_height]);
+module leg() {
+  difference() { 
+    cube([leg_wd,leg_wd,total_height]);
 
-  // punch the hole in the leg
-  translate([leg_thickness,leg_thickness,0])
-    cube([leg_hole_wd,leg_hole_wd,leg_hole_height]);
+    // punch the hole in the leg
+    translate([leg_thickness,leg_thickness,0])
+      cube([leg_hole_wd,leg_hole_wd,leg_hole_height]);
 
-  // carve the support cylinder on top so we don't need supports the whole way up
-  translate([leg_wd/2, leg_wd/2, leg_hole_height])
-    rotate(a=[90,11.25,0]) // 11.25 sets a vertex at the top rather than a side
-    cylinder(h=leg_hole_wd, r=leg_cylinder_support_radius, center=true);
+    // carve the support cylinder on top so we don't need supports the whole way up
+    translate([leg_wd/2, leg_wd/2, leg_hole_height])
+      rotate(a=[90,11.25,0]) // 11.25 sets a vertex at the top rather than a side
+      cylinder(h=leg_hole_wd, r=leg_cylinder_support_radius, center=true);
 
-  tab_band();
-  tab_squeeze_cutout();  
-  translate([0,0,table_height]) leg_difference_tube_with_height(tab_squeeze_total_h+render_slop);
-  tab_angle_cutouts();
+    tab_band();
+    tab_squeeze_cutout();  
+    translate([0,0,table_height]) leg_difference_tube_with_height(tab_squeeze_total_h+render_slop);
+    tab_angle_cutouts();
+  }
 }
 
-translate([1*inch, 0, 0 * table_height]) difference() {
-  cube([leg_wd, leg_wd, table_thickness]);
+module table_proxy() {
+  difference() {
+    cube([leg_wd, leg_wd, table_thickness]);
 
-  translate([leg_thickness - (print_slop/2), (leg_wd/2) - (table_hole_d/2) - (print_slop/2), -sixteenth_inch])
-    cube([table_hole_w + print_slop, table_hole_d + print_slop, 17*sixteenth_inch]);
+    translate([leg_thickness - (print_slop/2), (leg_wd/2) - (table_hole_d/2) - (print_slop/2), -sixteenth_inch])
+      cube([table_hole_w + print_slop, table_hole_d + print_slop, 17*sixteenth_inch]);
+  }
 }
+
+leg();
+translate([1*inch, 0, 0]) table_proxy();
