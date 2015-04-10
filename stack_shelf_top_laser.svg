@@ -1,0 +1,21 @@
+<svg
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:svg="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    width="12in" height="11in">
+  <title>Stacking Shelf Laser Template</title>
+  <desc>
+    Specifies the cuts for the leg holes that match stack_shelf_leg.scad.
+    Holes are 3/8" x 9/32". Orientation happens to match the shelf itself, but
+    isn't important. Most laser cutter docs I've found online expect fine red
+    lines for cuts, so that's what I've done here.
+  </desc>
+  <defs>
+    <rect id="leg_cutout" width="0.375in" height="0.28125in"
+        stroke="red" fill="none" style="stroke-width: 0.001in"/>
+  </defs>
+  <use xlink:href="#leg_cutout" x="0.25in" y="0.25in"/>
+  <use xlink:href="#leg_cutout" x="11.375in" y="0.25in"/>
+  <use xlink:href="#leg_cutout" x="0.25in" y="10.46875in"/>
+  <use xlink:href="#leg_cutout" x="11.375in" y="10.46875in"/>
+</svg>
